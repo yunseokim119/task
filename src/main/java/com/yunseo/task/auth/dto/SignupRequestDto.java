@@ -1,13 +1,12 @@
 package com.yunseo.task.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
-@Setter
-@RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignupRequestDto {
 
     @NotBlank(message = "사용자 이름은 필수입니다.")

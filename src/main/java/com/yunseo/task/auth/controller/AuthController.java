@@ -2,16 +2,15 @@ package com.yunseo.task.auth.controller;
 
 import com.yunseo.task.auth.dto.LoginRequestDto;
 import com.yunseo.task.auth.dto.SignupRequestDto;
-import com.yunseo.task.auth.entity.AuthUser;
-import com.yunseo.task.auth.entity.User;
-import com.yunseo.task.auth.service.AuthService;
 import com.yunseo.task.auth.exception.UserAlreadyExistsException;
+import com.yunseo.task.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,48 +94,6 @@ public class AuthController {
                             "error", Map.of(
                                     "code", "INVALID_CREDENTIALS",
                                     "message", e.getMessage()
-                            )
-                    )
-            );
-        }
-    }
-
-    // 관리자 권한 부여 API
-    @PatchMapping("/admin/users/{userId}/roles")
-    public ResponseEntity<?> assignAdminRole(@PathVariable Long userId) {
-        // 현재 인증된 사용자 확인
-        AuthUser currentUser = (AuthUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        // 현재 사용자가 관리자 권한을 가지고 있는지 확인
-        if (!currentUser.getRole().equals("ADMIN")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                    Map.of(
-                            "error", Map.of(
-                                    "code", "ACCESS_DENIED",
-                                    "message", "관리자 권한이 필요한 요청입니다. 접근 권한이 없습니다."
-                            )
-                    )
-            );
-        }
-
-        try {
-            // 사용자에게 관리자 권한 부여
-            User updatedUser = authService.assignRoleToUser(userId, "ADMIN");
-
-            // 관리자 권한 부여 성공 응답
-            return ResponseEntity.ok().body(
-                    Map.of(
-                            "username", updatedUser.getUsername(),
-                            "nickname", updatedUser.getNickname(),
-                            "roles", List.of(Map.of("role", "Admin"))
-                    )
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    Map.of(
-                            "error", Map.of(
-                                    "code", "USER_NOT_FOUND",
-                                    "message", "사용자를 찾을 수 없습니다."
                             )
                     )
             );
